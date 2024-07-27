@@ -147,7 +147,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     FAST_TASK(Log_Video_Stabilisation),
 #endif
 
-    SCHED_TASK(rc_loop,              250,    130,  3),
+    SCHED_TASK(rc_loop,               50,    130,  3), // MA: changed Hz from 250 to 50 since logger is not controlling anything
     SCHED_TASK(throttle_loop,         50,     75,  6),
 #if AP_FENCE_ENABLED
     SCHED_TASK(fence_check,           25,    100,  7),
@@ -215,7 +215,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #endif
 #if HAL_LOGGING_ENABLED
     SCHED_TASK(ten_hz_logging_loop,   10,    350, 114),
-    SCHED_TASK(twentyfive_hz_logging, 25,    110, 117),
+    SCHED_TASK(twentyfive_hz_logging, 30,    110, 117), // MA changed to 30 Hz
     SCHED_TASK_CLASS(AP_Logger,            &copter.logger,              periodic_tasks, 400, 300, 120),
 #endif
     SCHED_TASK_CLASS(AP_InertialSensor,    &copter.ins,                 periodic,       400,  50, 123),
@@ -581,6 +581,7 @@ void Copter::ten_hz_logging_loop()
     if (should_log(MASK_LOG_MOTBATT)) {
         motors->Log_Write();
     }
+    /* MA: Moved to twentyfive_hz logging loop
     if (should_log(MASK_LOG_RCIN)) {
         logger.Write_RCIN();
 #if AP_RSSI_ENABLED
@@ -589,6 +590,7 @@ void Copter::ten_hz_logging_loop()
         }
 #endif
     }
+    */
     if (should_log(MASK_LOG_RCOUT)) {
         logger.Write_RCOUT();
     }
@@ -632,6 +634,17 @@ void Copter::twentyfive_hz_logging()
     if (should_log(MASK_LOG_IMU) && !(should_log(MASK_LOG_IMU_FAST))) {
         AP::ins().Write_IMU();
     }
+// MA: moved here from the ten_hz logging loop
+
+    if (should_log(MASK_LOG_RCIN)) {
+        logger.Write_RCIN();
+#if AP_RSSI_ENABLED
+        if (rssi.enabled()) {
+            logger.Write_RSSI();
+        }
+#endif
+    }
+// MA
 
 #if MODE_AUTOROTATE_ENABLED == ENABLED
     if (should_log(MASK_LOG_ATTITUDE_MED) || should_log(MASK_LOG_ATTITUDE_FAST)) {
