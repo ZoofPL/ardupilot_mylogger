@@ -147,7 +147,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     FAST_TASK(Log_Video_Stabilisation),
 #endif
 
-    SCHED_TASK(rc_loop,               50,    130,  3), // MA: changed Hz from 250 to 50 since logger is not controlling anything
+    SCHED_TASK(rc_loop,               250,    130,  3),
     SCHED_TASK(throttle_loop,         50,     75,  6),
 #if AP_FENCE_ENABLED
     SCHED_TASK(fence_check,           25,    100,  7),
